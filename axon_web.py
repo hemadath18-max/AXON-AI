@@ -1,24 +1,24 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding
+# 1. Your Pride & Joy
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. Sidebar for the Key
+# 2. The Key Entry
 with st.sidebar:
-    st.header("Settings")
-    user_key = st.text_input("Paste API Key:", type="password")
+    st.header("🔑 Control Panel")
+    user_key = st.text_input("Paste API Key here:", type="password")
+    st.markdown("---")
+    st.write("Keep going, Hemadath!")
 
-# 3. Chat Logic
+# 3. The Stable Brain
 if user_key:
     try:
-        # Simple connection
         genai.configure(api_key=user_key)
-        
-        # WE USE 'gemini-1.5-flash' - the most stable name!
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # We use gemini-pro because it's the most reliable!
+        model = genai.GenerativeModel('gemini-pro')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -27,18 +27,18 @@ if user_key:
             with st.chat_message(msg["role"]):
                 st.write(msg["content"])
 
-        if prompt := st.chat_input("Say something to AXON..."):
+        if prompt := st.chat_input("Talk to AXON..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
 
-            # Get the response
+            # Direct call
             response = model.generate_content(prompt)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             with st.chat_message("assistant"):
                 st.write(response.text)
                 
     except Exception as e:
-        st.error("Wait a moment, then try again!")
+        st.error("Just a small glitch. Try hitting Enter again!")
 else:
-    st.warning("Hemadath, paste your key in the sidebar to start!")
+    st.info("👋 Welcome! Hemadath, please paste your key in the sidebar to begin.")
