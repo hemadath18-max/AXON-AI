@@ -1,47 +1,69 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding & UI
-st.set_page_config(page_title="AXON AI", page_icon="🚀")
-st.title("✨ AXON: The Maverick Mentor")
-st.caption("Powered by AstroMind | Developed by HEMADATH")
+# =========================
+# 1. UI CONFIG
+# =========================
+st.set_page_config(page_title="AXON AI", page_icon="🚀", layout="centered")
 
-# 2. Sidebar for the Key
+st.title("✨ AXON: The Maverick Mentor")
+st.caption("Powered by AstroMindAI | Built by RC ANAND")
+
+# =========================
+# 2. SIDEBAR API KEY
+# =========================
 with st.sidebar:
     st.header("Control Center")
     api_key = st.text_input("Enter your Gemini API Key", type="password")
-    st.info("Get a fresh key at: aistudio.google.com")
+    st.info("Get your key from Google AI Studio")
 
-# 3. The Logic
-if api_key:
+# =========================
+# 3. CHECK API KEY
+# =========================
+if not api_key:
+    st.warning("👈 Please enter your API key to start AXON AI")
+    st.stop()
+
+# =========================
+# 4. CONFIGURE MODEL
+# =========================
+try:
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+except Exception as e:
+    st.error(f"Model setup failed: {e}")
+    st.stop()
+
+# =========================
+# 5. SESSION MEMORY
+# =========================
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# Show chat history
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.markdown(msg["content"])
+
+# =========================
+# 6. CHAT INPUT
+# =========================
+prompt = st.chat_input("Talk to AXON...")
+
+if prompt:
+    # User message
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # AI response (safe handling)
     try:
-        genai.configure(api_key=api_key)
-        
-        # THE 2026 FIX: Using the current stable 'gemini-2.5-flash'
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
-
-        # Display chat history
-        for msg in st.session_state.messages:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
-
-        # Chat Input
-        if prompt := st.chat_input("Talk to AXON..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            # Get AI Response
-            response = model.generate_content(prompt)
-            
-            with st.chat_message("assistant"):
-                st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-            
+        response = model.generate_content(prompt)
+        reply = response.text
     except Exception as e:
-        st.error(f"Connection issue: {e}")
-else:
-    st.warning("👈 Please paste your API key in the sidebar to start!")
+        reply = f"⚠️ Error from AI: {e}"
+
+    # Assistant message
+    st.session_state.messages.append({"role": "assistant", "content": reply})
+    with st.chat_message("assistant"):
+        st.markdown(reply)
