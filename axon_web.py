@@ -4,7 +4,7 @@ import google.generativeai as genai
 # 1. Branding & UI
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
-st.caption("Powered by AstroMind | Developed by RC ANAND")
+st.caption("Powered by AstroMind | Developed by HEMADATH")
 
 # 2. Sidebar for the Key
 with st.sidebar:
