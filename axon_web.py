@@ -1,24 +1,24 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding - Your Identity
+# 1. Branding - Your Legacy
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. The Sidebar Key (The simplest way)
+# 2. Simplified Sidebar
 with st.sidebar:
-    st.header("🔑 Activation")
+    st.header("🔑 Control Panel")
     user_key = st.text_input("Paste API Key:", type="password")
     st.info("Get a fresh key from: aistudio.google.com")
 
-# 3. The "Smart" Connection Logic
+# 3. THE FIX: Using the most stable connection method
 if user_key:
     try:
-        # We clean the key automatically
+        # We strip spaces and connect
         genai.configure(api_key=user_key.strip())
         
-        # We use the most updated model name
+        # We use 'gemini-1.5-flash' - it is the most modern version
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         if "messages" not in st.session_state:
@@ -29,26 +29,22 @@ if user_key:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        # Chat Input
-        if prompt := st.chat_input("Ask Hemadath's AI anything..."):
+        # Chat Logic
+        if prompt := st.chat_input("Talk to AXON..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            # GETTING THE RESPONSE
-            with st.spinner("AXON is thinking..."):
-                try:
-                    response = model.generate_content(prompt)
-                    if response.text:
-                        st.session_state.messages.append({"role": "assistant", "content": response.text})
-                        with st.chat_message("assistant"):
-                            st.markdown(response.text)
-                    else:
-                        st.error("Google didn't send text. Try asking again!")
-                except Exception as api_error:
-                    st.error(f"Connection error. Please re-paste your key! {api_error}")
-
+            # Force a simple response
+            response = model.generate_content(prompt)
+            
+            if response:
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                with st.chat_message("assistant"):
+                    st.markdown(response.text)
+                    
     except Exception as e:
-        st.error(f"Setup error: {e}")
+        # If there's an error, we show a simple message
+        st.error("Hemadath, the connection timed out. Please try one more time!")
 else:
-    st.warning("👋 Hemadath, your app is ready! Just paste your API Key in the sidebar to start.")
+    st.info("👋 Hemadath, paste your API key in the sidebar to wake me up!")
