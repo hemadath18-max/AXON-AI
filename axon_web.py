@@ -1,50 +1,50 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding - Your Legacy
+# 1. Branding
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. Simplified Sidebar
+# 2. Key Input
 with st.sidebar:
-    st.header("🔑 Control Panel")
+    st.header("🔑 Activation")
     user_key = st.text_input("Paste API Key:", type="password")
-    st.info("Get a fresh key from: aistudio.google.com")
 
-# 3. THE FIX: Using the most stable connection method
+# 3. Stable Connection Logic
 if user_key:
     try:
-        # We strip spaces and connect
+        # Use the standard connection
         genai.configure(api_key=user_key.strip())
-        
-        # We use 'gemini-1.5-flash' - it is the most modern version
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
-        # Display history
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        # Chat Logic
         if prompt := st.chat_input("Talk to AXON..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            # Force a simple response
-            response = model.generate_content(prompt)
-            
-            if response:
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+            # THE FIX: This 'stream' makes it much faster and stops the 'timeout'
+            try:
+                response = model.generate_content(prompt, stream=True)
+                full_text = ""
                 with st.chat_message("assistant"):
-                    st.markdown(response.text)
-                    
+                    message_placeholder = st.empty()
+                    for chunk in response:
+                        full_text += chunk.text
+                        message_placeholder.markdown(full_text + "▌")
+                    message_placeholder.markdown(full_text)
+                st.session_state.messages.append({"role": "assistant", "content": full_text})
+            except:
+                st.error("Hemadath, just hit 'Enter' one more time! Google is waking up.")
+                
     except Exception as e:
-        # If there's an error, we show a simple message
-        st.error("Hemadath, the connection timed out. Please try one more time!")
+        st.error("Check your sidebar key, Buddy!")
 else:
-    st.info("👋 Hemadath, paste your API key in the sidebar to wake me up!")
+    st.info("👋 Hemadath, paste your key in the sidebar to start!")
