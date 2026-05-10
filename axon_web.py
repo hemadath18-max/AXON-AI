@@ -1,23 +1,23 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Branding
+# 1. Branding
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
-st.caption("Developed by RC ANAND")
+st.caption("Powered by AstroMind | Developed by RC ANAND")
 
-# Sidebar
+# 2. Sidebar Setup
 with st.sidebar:
-    st.header("Setup")
-    api_key = st.text_input("Paste Gemini API Key", type="password")
+    st.header("Settings")
+    api_key = st.text_input("Enter Gemini API Key", type="password")
+    st.info("Get your key at: aistudio.google.com")
 
+# 3. Main Chat Logic
 if api_key:
     try:
-        # THE MAGIC FIX: This line tells Google to use the stable version
         genai.configure(api_key=api_key)
-        
-        # We use 'gemini-1.5-flash' which is the most reliable
-         model = genai.GenerativeModel('gemini-1.5-flash-latest')
+        # Using the absolute latest stable model name
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -26,20 +26,16 @@ if api_key:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
-        if prompt := st.chat_input("Talk to AXON..."):
+        if prompt := st.chat_input("Ask AXON anything..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            # Generating response
             response = model.generate_content(prompt)
-            
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
             with st.chat_message("assistant"):
                 st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-            
     except Exception as e:
-        # If there's an error, it will show a friendly message
-        st.error("Almost there! Please check if your API Key is correct and has Gemini 1.5 Flash enabled.")
+        st.error(f"Waiting for valid key... {e}")
 else:
-    st.info("👈 Open the sidebar (click the small > arrow) and paste your API key!")
+    st.info("👈 Please enter your API Key in the sidebar to begin.")
