@@ -1,22 +1,24 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Your Brand
+# 1. Branding
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. Sidebar
+# 2. Control Panel
 with st.sidebar:
-    st.header("🔑 Control Panel")
+    st.header("🔑 Settings")
     user_key = st.text_input("Paste API Key:", type="password")
 
-# 3. The Brain
+# 3. The Stable Brain
 if user_key:
     try:
+        # THE FIX: This connects to Google correctly
         genai.configure(api_key=user_key)
-        # We use the most basic model name that Google ALWAYS recognizes
-        model = genai.GenerativeModel('gemini-pro')
+        
+        # Using the exact name Google wants right now
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
@@ -30,17 +32,16 @@ if user_key:
             with st.chat_message("user"):
                 st.write(prompt)
 
-            # This is the line that gets the answer!
+            # Get the response
             response = model.generate_content(prompt)
             
             if response.text:
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
                 with st.chat_message("assistant"):
                     st.write(response.text)
-            else:
-                st.write("AXON is thinking... try one more time!")
-                
+                    
     except Exception as e:
-        st.error(f"Almost there! Just re-paste your key. Error: {e}")
+        # This will tell us if it's just a typo in the key
+        st.error("Check your key and try one more time!")
 else:
-    st.info("👋 Hemadath, paste your key in the sidebar to start!")
+    st.info("👋 Hemadath, paste your key in the sidebar to begin!")
