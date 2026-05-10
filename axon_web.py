@@ -43,3 +43,4 @@ if api_key:
         st.error(f"Waiting for valid key... {e}")
 else:
     st.warning("👈 Open the sidebar (click the > arrow at top left) and enter your API key!")
+                                              
