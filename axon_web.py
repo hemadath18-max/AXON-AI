@@ -1,47 +1,42 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding & UI
+# 1. Page Branding
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
-st.caption("Powered by AstroMind | Developed by RC ANAND")
+st.caption("Developed by RC ANAND | Powered by AstroMind")
 
-# 2. Sidebar for the Key
-with st.sidebar:
-    st.header("Control Center")
-    api_key = st.text_input("Enter your Gemini API Key", type="password")
-    st.info("Get a fresh key at: aistudio.google.com")
-
-# 3. The Logic
-if api_key:
-    try:
+# 2. THE SECRET CONNECTION
+# This part looks into the 'Secrets' vault you just filled
+try:
+    if "GEMINI_API_KEY" in st.secrets:
+        api_key = st.secrets["GEMINI_API_KEY"]
         genai.configure(api_key=api_key)
-        
-        # THE 2026 FIX: Using the current stable 'gemini-2.5-flash'
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+        model = genai.GenerativeModel('gemini-1.5-flash')
+    else:
+        st.error("Wait! The Secret Key is missing from Streamlit Settings.")
+        st.stop()
+except Exception as e:
+    st.error(f"Connecting to brain... {e}")
+    st.stop()
 
-        # Display chat history
-        for msg in st.session_state.messages:
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+# 3. Simple Chat Interface (No Sidebar!)
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-        # Chat Input
-        if prompt := st.chat_input("Talk to AXON..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+# Show previous chat
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
 
-            # Get AI Response
-            response = model.generate_content(prompt)
-            
-            with st.chat_message("assistant"):
-                st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-            
-    except Exception as e:
-        st.error(f"Connection issue: {e}")
-else:
-    st.warning("👈 Please paste your API key in the sidebar to start!")
+# Take new input
+if prompt := st.chat_input("Talk to AXON..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
+
+    # Get AXON's reply automatically
+    response = model.generate_content(prompt)
+    st.session_state.messages.append({"role": "assistant", "content": response.text})
+    with st.chat_message("assistant"):
+        st.write(response.text)
