@@ -1,22 +1,26 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding
+# 1. Page Header
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. Stronger Connection Logic
-if "GEMINI_API_KEY" in st.secrets:
-    api_key = st.secrets["GEMINI_API_KEY"]
-    genai.configure(api_key=api_key)
-    # This 'latest' tag helps Google find the fastest server for you
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-else:
-    st.error("Hemadath, the Secret Key is missing!")
+# 2. Connection Logic
+try:
+    if "GEMINI_API_KEY" in st.secrets:
+        # We use transport='rest' for mobile stability
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"], transport='rest')
+        # Switching to 'gemini-pro' - the most stable model ever made
+        model = genai.GenerativeModel('gemini-pro')
+    else:
+        st.error("Hemadath, the Key is missing in Secrets!")
+        st.stop()
+except Exception as e:
+    st.error(f"Setup Error: {e}")
     st.stop()
 
-# 3. Chat System
+# 3. Chat Logic
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -30,11 +34,15 @@ if prompt := st.chat_input("Talk to AXON..."):
         st.write(prompt)
 
     try:
-        # We add a small 'safety' check here
+        # Get response
         response = model.generate_content(prompt)
-        if response:
+        
+        # Check if response actually has text
+        if response and response.text:
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             with st.chat_message("assistant"):
                 st.write(response.text)
+        else:
+            st.info("I'm connected, but I couldn't find the answer. Try asking again!")
     except Exception as e:
-        st.info("I'm waking up... try sending that one more time, Hemadath!")
+        st.error("AXON is stretching! Give him one more message.")
