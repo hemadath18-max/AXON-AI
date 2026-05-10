@@ -1,18 +1,22 @@
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="AXON AI")
+# Branding
+st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
-st.write("Developed by RC ANAND")
+st.caption("Developed by RC ANAND")
 
+# Sidebar
 with st.sidebar:
     st.header("Setup")
-    api_key = st.text_input("Gemini API Key", type="password")
+    api_key = st.text_input("Paste Gemini API Key", type="password")
 
 if api_key:
     try:
-        # THE FIX: This forces the stable API version
-        genai.configure(api_key=api_key, transport='rest')
+        # THE MAGIC FIX: This line tells Google to use the stable version
+        genai.configure(api_key=api_key)
+        
+        # We use 'gemini-1.5-flash' which is the most reliable
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         if "messages" not in st.session_state:
@@ -27,11 +31,15 @@ if api_key:
             with st.chat_message("user"):
                 st.markdown(prompt)
 
+            # Generating response
             response = model.generate_content(prompt)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
+            
             with st.chat_message("assistant"):
                 st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+            
     except Exception as e:
-        st.error(f"Error: {e}")
+        # If there's an error, it will show a friendly message
+        st.error("Almost there! Please check if your API Key is correct and has Gemini 1.5 Flash enabled.")
 else:
-    st.info("👈 Open the sidebar (arrow at top left) and paste your API key!")
+    st.info("👈 Open the sidebar (click the small > arrow) and paste your API key!")
