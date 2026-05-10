@@ -1,39 +1,45 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. WEBSITE SETTINGS
+# 1. PAGE SETTINGS
 st.set_page_config(page_title="AXON by RC ANAND", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Powered by AstroMind | Developed by RC ANAND")
 
-# 2. THE SECRET KEY (Safety First!)
-# On a website, we let the user put their own key for privacy
+# 2. THE SIDEBAR
 with st.sidebar:
+    st.header("Settings")
     api_key = st.text_input("Enter Gemini API Key", type="password")
-    "[Get a Google API key](https://aistudio.google.com/app/apikey)"
+    st.info("Get your key at: aistudio.google.com")
 
 # 3. INITIALIZE AXON
 if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel(model_name="gemini-1.5-flash")
-    
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    try:
+        genai.configure(api_key=api_key)
+        # Using the corrected model setup
+        model = genai.GenerativeModel(model_name="gemini-1.5-flash")
+        
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
 
-    # Display chat history
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+        # Display history
+        for message in st.session_state.messages:
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
-    # Chat Input
-    if prompt := st.chat_input("Ask AXON anything..."):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        # Chat Input
+        if prompt := st.chat_input("Ask AXON anything..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        with st.chat_message("assistant"):
-            response = model.generate_content(prompt)
-            st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
+            with st.chat_message("assistant"):
+                # System instruction for the mentor personality
+                full_prompt = f"System: You are AXON, a wise mentor created by RC ANAND. Answer this: {prompt}"
+                response = model.generate_content(full_prompt)
+                st.markdown(response.text)
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+    except Exception as e:
+        st.error(f"Waiting for valid key... {e}")
 else:
-    st.info("Please add your API key in the sidebar to wake AXON.")
+    st.warning("👈 Open the sidebar (click the > arrow at top left) and enter your API key!")
