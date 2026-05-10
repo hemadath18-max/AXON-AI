@@ -1,50 +1,47 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Branding
+# 1. Branding & UI
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
-st.caption("Developed by Hemadath | Powered by AstroMind")
+st.caption("Powered by AstroMind | Developed by RC ANAND")
 
-# 2. Key Input
+# 2. Sidebar for the Key
 with st.sidebar:
-    st.header("🔑 Activation")
-    user_key = st.text_input("Paste API Key:", type="password")
+    st.header("Control Center")
+    api_key = st.text_input("Enter your Gemini API Key", type="password")
+    st.info("Get a fresh key at: aistudio.google.com")
 
-# 3. Stable Connection Logic
-if user_key:
+# 3. The Logic
+if api_key:
     try:
-        # Use the standard connection
-        genai.configure(api_key=user_key.strip())
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        genai.configure(api_key=api_key)
+        
+        # THE 2026 FIX: Using the current stable 'gemini-2.5-flash'
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
+        # Display chat history
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
                 st.markdown(msg["content"])
 
+        # Chat Input
         if prompt := st.chat_input("Talk to AXON..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            # THE FIX: This 'stream' makes it much faster and stops the 'timeout'
-            try:
-                response = model.generate_content(prompt, stream=True)
-                full_text = ""
-                with st.chat_message("assistant"):
-                    message_placeholder = st.empty()
-                    for chunk in response:
-                        full_text += chunk.text
-                        message_placeholder.markdown(full_text + "▌")
-                    message_placeholder.markdown(full_text)
-                st.session_state.messages.append({"role": "assistant", "content": full_text})
-            except:
-                st.error("Hemadath, just hit 'Enter' one more time! Google is waking up.")
-                
+            # Get AI Response
+            response = model.generate_content(prompt)
+            
+            with st.chat_message("assistant"):
+                st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
+            
     except Exception as e:
-        st.error("Check your sidebar key, Buddy!")
+        st.error(f"Connection issue: {e}")
 else:
-    st.info("👋 Hemadath, paste your key in the sidebar to start!")
+    st.warning("👈 Please paste your API key in the sidebar to start!")
