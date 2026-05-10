@@ -17,7 +17,7 @@ if api_key:
         genai.configure(api_key=api_key)
         
         # We use 'gemini-1.5-flash' which is the most reliable
-        model = genai.GenerativeModel('gemini-1.5-flash')
+         model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         if "messages" not in st.session_state:
             st.session_state.messages = []
