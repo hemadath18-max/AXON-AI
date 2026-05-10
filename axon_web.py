@@ -1,61 +1,42 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Page Header
+# 1. Branding
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. THE MASTER CONNECTION
-try:
-    if "GEMINI_API_KEY" in st.secrets:
-        # Connect to Google with a clean rest transport
-        genai.configure(api_key=st.secrets["GEMINI_API_KEY"], transport='rest')
-        
-        # We tell Google: "Don't block anything, this is a safe student project"
-        safety_settings = [
-            {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_SEXUALLY_EXPLICIT", "threshold": "BLOCK_NONE"},
-            {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
-        ]
-        
-        model = genai.GenerativeModel(
-            model_name='gemini-1.5-flash',
-            safety_settings=safety_settings
-        )
-    else:
-        st.error("Hemadath, please put the API Key in the Streamlit Secrets box!")
-        st.stop()
-except Exception as e:
-    st.error(f"Setup Error: {e}")
-    st.stop()
+# 2. Simple Sidebar for your Key
+with st.sidebar:
+    st.header("Settings")
+    user_key = st.text_input("Paste your Gemini API Key here:", type="password")
+    st.info("Get your key from: aistudio.google.com")
 
-# 3. Chat System
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for msg in st.session_state.messages:
-    with st.chat_message(msg["role"]):
-        st.write(msg["content"])
-
-if prompt := st.chat_input("Talk to AXON..."):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.write(prompt)
-
-    # THE BRAIN PUSH
+# 3. Connection Logic
+if user_key:
     try:
-        # We use a very simple call to get the text directly
-        response = model.generate_content(prompt)
+        genai.configure(api_key=user_key, transport='rest')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
-        if response.text:
+        # Chat System
+        if "messages" not in st.session_state:
+            st.session_state.messages = []
+
+        for msg in st.session_state.messages:
+            with st.chat_message(msg["role"]):
+                st.write(msg["content"])
+
+        if prompt := st.chat_input("Talk to AXON..."):
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            with st.chat_message("user"):
+                st.write(prompt)
+
+            response = model.generate_content(prompt)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             with st.chat_message("assistant"):
                 st.write(response.text)
-        else:
-            st.warning("Google sent an empty reply. Try a different question!")
-            
+                
     except Exception as e:
-        # If there is a real error, we want to see EXACTLY what it is
-        st.error(f"Error: {str(e)}")
+        st.error(f"Try pasting the key again, Hemadath! Error: {e}")
+else:
+    st.warning("Please paste your API key in the sidebar to start chatting!")
