@@ -7,7 +7,7 @@ import google.generativeai as genai
 st.set_page_config(page_title="AXON AI", page_icon="🚀", layout="centered")
 
 st.title("✨ AXON: The Maverick Mentor")
-st.caption("Powered by AstroMindAI | Built by RC ANAND")
+st.caption("Powered by AstroMindAI | Built by HEMADATH")
 
 # =========================
 # 2. SIDEBAR API KEY
@@ -29,7 +29,7 @@ if not api_key:
 # =========================
 try:
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
+    model = genai.GenerativeModel("gemini-1.5-pro")
 except Exception as e:
     st.error(f"Model setup failed: {e}")
     st.stop()
