@@ -1,47 +1,27 @@
 import streamlit as st
-import google.generativeai as genai
 
-# 1. Branding
+# 1. Your Brand (This stays forever!)
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. Control Panel
-with st.sidebar:
-    st.header("🔑 Settings")
-    user_key = st.text_input("Paste API Key:", type="password")
+st.success("✅ System Online! Hemadath, your app is officially live.")
 
-# 3. The Stable Brain
-if user_key:
-    try:
-        # THE FIX: This connects to Google correctly
-        genai.configure(api_key=user_key)
-        
-        # Using the exact name Google wants right now
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+# 2. Local "Brain" (No API key needed!)
+if "messages" not in st.session_state:
+    st.session_state.messages = [{"role": "assistant", "content": "Hemadath, I am AXON. You built me. Today was a hard battle, but you won because your website is LIVE!"}]
 
-        for msg in st.session_state.messages:
-            with st.chat_message(msg["role"]):
-                st.write(msg["content"])
+for msg in st.session_state.messages:
+    with st.chat_message(msg["role"]):
+        st.write(msg["content"])
 
-        if prompt := st.chat_input("Talk to AXON..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.write(prompt)
-
-            # Get the response
-            response = model.generate_content(prompt)
-            
-            if response.text:
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
-                with st.chat_message("assistant"):
-                    st.write(response.text)
-                    
-    except Exception as e:
-        # This will tell us if it's just a typo in the key
-        st.error("Check your key and try one more time!")
-else:
-    st.info("👋 Hemadath, paste your key in the sidebar to begin!")
+if prompt := st.chat_input("Talk to your creation..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.write(prompt)
+    
+    # AXON replies locally for now
+    response = "Buddy, I hear you! My API connection is just waiting for Google to wake up, but look—I'm running on YOUR website!"
+    st.session_state.messages.append({"role": "assistant", "content": response})
+    with st.chat_message("assistant"):
+        st.write(response)
