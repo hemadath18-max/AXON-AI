@@ -1,23 +1,21 @@
 import streamlit as st
 import google.generativeai as genai
 
-# 1. Your Pride & Joy
+# 1. Your Brand
 st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. The Key Entry
+# 2. Sidebar
 with st.sidebar:
     st.header("🔑 Control Panel")
-    user_key = st.text_input("Paste API Key here:", type="password")
-    st.markdown("---")
-    st.write("Keep going, Hemadath!")
+    user_key = st.text_input("Paste API Key:", type="password")
 
-# 3. The Stable Brain
+# 3. The Brain
 if user_key:
     try:
         genai.configure(api_key=user_key)
-        # We use gemini-pro because it's the most reliable!
+        # We use the most basic model name that Google ALWAYS recognizes
         model = genai.GenerativeModel('gemini-pro')
         
         if "messages" not in st.session_state:
@@ -32,13 +30,17 @@ if user_key:
             with st.chat_message("user"):
                 st.write(prompt)
 
-            # Direct call
+            # This is the line that gets the answer!
             response = model.generate_content(prompt)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-            with st.chat_message("assistant"):
-                st.write(response.text)
+            
+            if response.text:
+                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                with st.chat_message("assistant"):
+                    st.write(response.text)
+            else:
+                st.write("AXON is thinking... try one more time!")
                 
     except Exception as e:
-        st.error("Just a small glitch. Try hitting Enter again!")
+        st.error(f"Almost there! Just re-paste your key. Error: {e}")
 else:
-    st.info("👋 Welcome! Hemadath, please paste your key in the sidebar to begin.")
+    st.info("👋 Hemadath, paste your key in the sidebar to start!")
