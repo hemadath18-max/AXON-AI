@@ -6,19 +6,20 @@ st.set_page_config(page_title="AXON AI", page_icon="🚀")
 st.title("✨ AXON: The Maverick Mentor")
 st.caption("Developed by Hemadath | Powered by AstroMind")
 
-# 2. Simple Sidebar for your Key
+# 2. Sidebar for the Key
 with st.sidebar:
     st.header("Settings")
-    user_key = st.text_input("Paste your Gemini API Key here:", type="password")
-    st.info("Get your key from: aistudio.google.com")
+    user_key = st.text_input("Paste API Key:", type="password")
 
-# 3. Connection Logic
+# 3. Chat Logic
 if user_key:
     try:
-        genai.configure(api_key=user_key, transport='rest')
+        # Simple connection
+        genai.configure(api_key=user_key)
+        
+        # WE USE 'gemini-1.5-flash' - the most stable name!
         model = genai.GenerativeModel('gemini-1.5-flash')
         
-        # Chat System
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
@@ -26,17 +27,18 @@ if user_key:
             with st.chat_message(msg["role"]):
                 st.write(msg["content"])
 
-        if prompt := st.chat_input("Talk to AXON..."):
+        if prompt := st.chat_input("Say something to AXON..."):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.write(prompt)
 
+            # Get the response
             response = model.generate_content(prompt)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
             with st.chat_message("assistant"):
                 st.write(response.text)
                 
     except Exception as e:
-        st.error(f"Try pasting the key again, Hemadath! Error: {e}")
+        st.error("Wait a moment, then try again!")
 else:
-    st.warning("Please paste your API key in the sidebar to start chatting!")
+    st.warning("Hemadath, paste your key in the sidebar to start!")
